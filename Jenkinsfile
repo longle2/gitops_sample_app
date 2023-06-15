@@ -1,5 +1,8 @@
-node {
+pipeline {
     def app
+    options {
+        skipStagesAfterUnstable()
+    }
     stage('Clone repository') {
         steps{
                 script{
