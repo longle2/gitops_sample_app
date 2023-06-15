@@ -1,15 +1,19 @@
 node {
     def app
-
-    stage('Clone repository') {
-      
-
-        checkout scm
+    options {
+        skipStagesAfterUnstable()
     }
+    stage('Clone repository') {
+        steps{
+                script{
+                    checkout scm
+                }
+            }
+        }
 
     stage('Build image') {
   
-       app = docker.build("raj80dockerid/test")
+       app = docker.build("gitops-sample-app")
     }
 
     stage('Test image') {
@@ -22,13 +26,13 @@ node {
 
     stage('Push image') {
         
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+        docker.withRegistry('https://035296596762.dkr.ecr.ap-southeast-1.amazonaws.com', 'ecr:ap-southeast-1:aws-credentials') {
             app.push("${env.BUILD_NUMBER}")
         }
     }
     
-    stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
-        }
+    // stage('Trigger ManifestUpdate') {
+    //             echo "triggering updatemanifestjob"
+    //             build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+    //     }
 }
